@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OK Mini App</title>
+
+  <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 30px;
+      text-align: center;
+    }
+
+    button {
+      padding: 12px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    #status {
+      margin-top: 20px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h2>Авторизация</h2>
+
+  <button id="authButton">
+    Авторизоваться
+  </button>
+
+  <div id="status"></div>
+
+  <script>
+    const APP_ID = 54802046;
+
+    const status = document.getElementById("status");
+    const button = document.getElementById("authButton");
+
+    button.addEventListener("click", async () => {
+      try {
+        status.textContent = "Запрашиваем авторизацию...";
+
+        await vkBridge.send("VKWebAppInit");
+
+        const result = await vkBridge.send("VKWebAppGetAuthToken", {
+          app_id: APP_ID,
+          scope: "groups wall photos"
+        });
+
+        console.log("VK authorization result:", result);
+
+        if (result && result.access_token) {
+          status.textContent =
+            "Авторизация успешно получена.\n\nТеперь можно передать токен в Make.";
+        } else {
+          status.textContent =
+            "VK не вернул access_token.";
+        }
+
+      } catch (error) {
+        console.error(error);
+
+        status.textContent =
+          "Ошибка авторизации:\n" +
+          JSON.stringify(error, null, 2);
+      }
+    });
+  </script>
+
+</body>
+</html>
